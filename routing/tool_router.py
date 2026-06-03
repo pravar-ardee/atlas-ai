@@ -39,9 +39,29 @@ INTENT_TO_TOOLS = {
 
 def get_tools_for_intent(
     intent
-) -> list[str]:
+):
+    if intent == StudentIntent.STUDENT_PERFORMANCE:
 
-    return INTENT_TO_TOOLS.get(
-        intent,
-        []
-    )
+        return [
+            "atlas_tool"
+        ]
+
+    if intent == StudentIntent.DAILY_SUMMARY:
+
+        return [
+            "attendance_tool"
+        ]
+
+    if intent == StudentIntent.ATTENDANCE_SUMMARY:
+
+        return [
+            "attendance_tool"
+        ]
+
+    if intent == StudentIntent.ATLAS_SCORE_SUMMARY:
+
+        return [
+            "atlas_tool"
+        ]
+
+    return []

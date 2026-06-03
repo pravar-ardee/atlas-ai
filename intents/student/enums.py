@@ -14,3 +14,5 @@ class StudentIntent(str, Enum):
     STUDENT_PERFORMANCE = "student_performance"
 
     STUDENT_REPORT = "student_report"
+
+    ATLAS_SCORE_SUMMARY = "atlas_score_summary"

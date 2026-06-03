@@ -16,22 +16,29 @@ async def parse_intent(
     role: str
 ):
 
+    role = (
+        role
+        .strip()
+        .lower()
+    )
+
     if role == "student":
 
         return await parse_student_intent(
-            query
+            query=query
         )
 
+    
     # if role == "parent":
 
     #     return await parse_parent_intent(
-    #         query
+    #         query=query
     #     )
 
     # if role == "teacher":
 
     #     return await parse_teacher_intent(
-    #         query
+    #         query=query
     #     )
 
     raise ValueError(

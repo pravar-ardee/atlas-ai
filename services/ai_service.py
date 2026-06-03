@@ -31,12 +31,10 @@ class AIService:
         context
     ):
 
-
         parsed_intent = await parse_intent(
             query=query,
             role=context.role
         )
-
 
         parsed_intent = (
             DateService.validate(
@@ -49,7 +47,6 @@ class AIService:
             parsed_intent.model_dump()
         )
 
-
         tools_to_run = get_tools_for_intent(
             intent=parsed_intent.intent
         )
@@ -58,7 +55,6 @@ class AIService:
             "Selected Tools: %s",
             tools_to_run
         )
-
 
         results = {}
 
@@ -78,17 +74,63 @@ class AIService:
 
             results[tool_name] = result
 
+        # =====================================
+        # DIRECT ANSWER SHORT CIRCUIT
+        # =====================================
 
-        summary = await summarize_response(
-            query=query,
-            data=results,
-            context=context
-        )
+        direct_answer = None
+
+        for tool_result in results.values():
+
+            if not isinstance(
+                tool_result,
+                dict
+            ):
+                continue
+
+            answer = tool_result.get(
+                "direct_answer"
+            )
+
+            if answer:
+
+                direct_answer = answer
+                break
+
+        # =====================================
+        # SKIP LLM FOR DETERMINISTIC ANSWERS
+        # =====================================
+
+        if direct_answer:
+
+            logger.info(
+                "Using direct answer: %s",
+                direct_answer
+            )
+
+            summary = direct_answer
+
+        else:
+
+            summary = await summarize_response(
+                query=query,
+                data=results,
+                context=context
+            )
 
         return {
+
             "success": True,
-            "query": query,
-            "intent": parsed_intent.model_dump(),
-            "data": results,
-            "summary": summary
+
+            "query":
+                query,
+
+            "intent":
+                parsed_intent.model_dump(),
+
+            "data":
+                results,
+
+            "summary":
+                summary
         }
