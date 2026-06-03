@@ -1,0 +1,94 @@
+import logging
+
+from intents.router import (
+    parse_intent
+)
+
+from routing.tool_router import (
+    get_tools_for_intent
+)
+
+from tools.registry import (
+    TOOL_REGISTRY
+)
+
+from llm.summarizer import (
+    summarize_response
+)
+
+from services.date_service import (
+    DateService
+)
+
+logger = logging.getLogger(__name__)
+
+
+class AIService:
+
+    async def answer(
+        self,
+        query: str,
+        context
+    ):
+
+
+        parsed_intent = await parse_intent(
+            query=query,
+            role=context.role
+        )
+
+
+        parsed_intent = (
+            DateService.validate(
+                parsed_intent
+            )
+        )
+
+        logger.info(
+            "Parsed Intent: %s",
+            parsed_intent.model_dump()
+        )
+
+
+        tools_to_run = get_tools_for_intent(
+            intent=parsed_intent.intent
+        )
+
+        logger.info(
+            "Selected Tools: %s",
+            tools_to_run
+        )
+
+
+        results = {}
+
+        for tool_name in tools_to_run:
+
+            tool = TOOL_REGISTRY.get(
+                tool_name
+            )
+
+            if tool is None:
+                continue
+
+            result = await tool.run(
+                context=context,
+                parsed_intent=parsed_intent
+            )
+
+            results[tool_name] = result
+
+
+        summary = await summarize_response(
+            query=query,
+            data=results,
+            context=context
+        )
+
+        return {
+            "success": True,
+            "query": query,
+            "intent": parsed_intent.model_dump(),
+            "data": results,
+            "summary": summary
+        }
