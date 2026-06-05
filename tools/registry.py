@@ -11,6 +11,14 @@ from tools.assessment_tool import (
     AssessmentTool
 )
 
+from tools.announcement_tool import (
+    AnnouncementTool
+)
+
+from tools.forum_tool import (
+    ForumTool
+)
+
 TOOL_REGISTRY = {
 
     "atlas_tool": AtlasTool(),
@@ -20,4 +28,8 @@ TOOL_REGISTRY = {
     "homework_tool": HomeworkTool(),
 
     "assessment_tool": AssessmentTool(),
+
+    "announcement_tool": AnnouncementTool(),
+    
+    "forum_tool": ForumTool(),
 }

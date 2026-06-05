@@ -25,6 +25,8 @@ def get_tools_for_intent(
 
             "assessment_tool",
 
+            "announcement_tool",
+
             "atlas_tool"
         ]
 
@@ -123,5 +125,26 @@ def get_tools_for_intent(
 
             "assessment_tool"
         ]
+    
+    if (
+        intent
+        ==
+        StudentIntent.ANNOUNCEMENT_SUMMARY
+    ):
+
+        return [
+            "announcement_tool"
+        ]
+    
+    if (
+        intent
+        ==
+        StudentIntent.FORUM_SUMMARY
+    ):
+
+        return [
+            "forum_tool"
+        ]
 
     return []
+

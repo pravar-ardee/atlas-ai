@@ -10,6 +10,8 @@ from intents.student.prompt_parts.misc import MISC_PROMPTS
 from intents.student.prompt_parts.date_rules import DATE_RULES
 from intents.student.prompt_parts.module_rules import MODULE_RULES
 from intents.student.prompt_parts.response_format import RESPONSE_FORMAT
+from intents.student.prompt_parts.accouncement import ANNOUNCEMENT_PROMPT
+from intents.student.prompt_parts.forum import FORUM_PROMPT
 
 
 def get_student_intent_prompt():
@@ -32,6 +34,10 @@ SUPPORTED INTENTS
 {HOMEWORK_PROMPT}
 
 {ASSESSMENT_PROMPT}
+
+{FORUM_PROMPT}
+
+{ANNOUNCEMENT_PROMPT}
 
 {ATLAS_PROMPT}
 

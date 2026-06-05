@@ -1,3 +1,5 @@
+# intents/student/enums.py
+
 from enum import Enum
 
 
@@ -11,8 +13,12 @@ class StudentIntent(str, Enum):
 
     ASSESSMENT_SUMMARY = "assessment_summary"
 
+    ATLAS_SCORE_SUMMARY = "atlas_score_summary"
+
+    ANNOUNCEMENT_SUMMARY = "announcement_summary"
+
+    FORUM_SUMMARY = "forum_summary"
+
     STUDENT_PERFORMANCE = "student_performance"
 
     STUDENT_REPORT = "student_report"
-
-    ATLAS_SCORE_SUMMARY = "atlas_score_summary"
