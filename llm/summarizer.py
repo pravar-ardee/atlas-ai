@@ -360,8 +360,39 @@ Use only supplied data.
 
 {common}
 """
+        
+    if intent == StudentIntent.SUBJECT_SUMMARY:
 
-    return common
+        return f"""
+    You are Atlas AI.
+
+    You are analyzing subject performance.
+
+    Use only subject data.
+
+    If subject_analysis=true:
+
+    Explain:
+
+    - strongest subject
+    - weakest subject
+    - score differences
+    - grades
+    - recommended focus
+
+    Use actual values.
+
+    Do not discuss:
+
+    - attendance
+    - homework
+    - assessments
+    - atlas score
+
+    unless explicitly present.
+
+    {common}
+    """
 
 
 async def summarize_response(

@@ -145,6 +145,16 @@ def get_tools_for_intent(
         return [
             "forum_tool"
         ]
+    
+    if (
+        intent
+        ==
+        StudentIntent.SUBJECT_SUMMARY
+    ):
+
+        return [
+            "subject_tool"
+        ]
 
     return []
 

@@ -12,7 +12,7 @@ from intents.student.prompt_parts.module_rules import MODULE_RULES
 from intents.student.prompt_parts.response_format import RESPONSE_FORMAT
 from intents.student.prompt_parts.accouncement import ANNOUNCEMENT_PROMPT
 from intents.student.prompt_parts.forum import FORUM_PROMPT
-
+from intents.student.prompt_parts.subject import SUBJECT_PROMPT
 
 def get_student_intent_prompt():
 
@@ -34,6 +34,8 @@ SUPPORTED INTENTS
 {HOMEWORK_PROMPT}
 
 {ASSESSMENT_PROMPT}
+
+{SUBJECT_PROMPT}
 
 {FORUM_PROMPT}
 
