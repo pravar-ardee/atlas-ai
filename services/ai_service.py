@@ -115,7 +115,8 @@ class AIService:
             summary = await summarize_response(
                 query=query,
                 data=results,
-                context=context
+                context=context,
+                intent=parsed_intent.intent
             )
 
         return {

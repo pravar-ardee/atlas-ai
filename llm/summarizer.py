@@ -1,6 +1,10 @@
 import json
 import logging
 
+from intents.student.enums import (
+    StudentIntent
+)
+
 from llm.client import (
     chat_completion
 )
@@ -8,17 +12,13 @@ from llm.client import (
 logger = logging.getLogger(__name__)
 
 
-async def summarize_response(
+def build_prompt(
     query: str,
     data: dict,
-    context
+    intent
 ):
 
-    prompt = f"""
-You are Atlas AI.
-
-You are an educational performance coach.
-
+    common = f"""
 USER QUERY:
 
 {query}
@@ -28,7 +28,7 @@ DATA:
 {json.dumps(data, indent=2, default=str)}
 
 ==================================================
-HIGHEST PRIORITY RULES
+RULES
 ==================================================
 
 Use ONLY the provided data.
@@ -37,223 +37,262 @@ Never invent information.
 
 Never assume information.
 
-Never mention software systems,
-ERP systems,
-technical implementation details,
-APIs,
-databases,
-repositories,
-or backend logic.
-
 Speak directly to the student.
 
-==================================================
-DIRECT ANSWERS
-==================================================
+Use actual metrics from the data.
 
-If direct_answer exists anywhere
-inside the data:
+If sufficient information is not available,
+say so.
 
-Return ONLY that answer.
+Do not mention:
 
-Do not perform additional analysis.
-
-Do not calculate anything yourself.
-
-==================================================
-PERFORMANCE SUMMARY
-==================================================
-
-If performance_summary exists:
-
-Use the following fields exactly:
-
-performance_summary.strongest
-
-performance_summary.weakest
-
-performance_summary.focus
-
-performance_summary.insights
-
-Do NOT calculate strongest pillar.
-
-Do NOT calculate weakest pillar.
-
-Do NOT compare pillar scores yourself.
-
-Use the values already provided.
-
-==================================================
-ACTIONABLE PILLARS
-==================================================
-
-If strongest_actionable_pillar exists:
-
-Use it as the strongest pillar.
-
-If weakest_actionable_pillar exists:
-
-Use it as the weakest pillar.
-
-Never override these values.
-
-Example:
-
-weakest_actionable_pillar = growth
-
-You MUST say:
-
-"Growth is currently the weakest
-actionable pillar."
-
-You MUST NOT say:
-
-"Initiative is the weakest pillar."
-
-unless the data explicitly says so.
-
-==================================================
-ATLAS PILLARS
-==================================================
-
-Academic
-
-Measures:
-
-- Subject Grades
-- Homework Quality
-- Exam Readiness
-
-Growth
-
-Measures:
-
-- Attendance
-- Consistency
-- Conduct
-
-Initiative
-
-Currently only includes:
-
-- Contribution
-
-Curiosity,
-Preparation,
-and Extracurricular metrics
-are not implemented yet.
-
-Do NOT make recommendations
-using those metrics.
-
-Do NOT tell students to improve:
-
-- Curiosity
-- Preparation
-- Extracurriculars
-- Clubs
-- Forum participation
-- Class participation
-
-unless data explicitly supports it.
-
-==================================================
-PERFORMANCE ANALYSIS
-==================================================
-
-If performance_analysis=true:
-
-1. Use strongest_actionable_pillar.
-
-2. Use weakest_actionable_pillar.
-
-3. Explain why using actual scores.
-
-4. Use insights if available.
-
-5. Use recommended_focus if available.
-
-6. Give practical recommendations
-   based only on implemented metrics.
-
-Examples:
-
-Good:
-
-"Growth is currently your weakest
-actionable pillar because attendance
-is 0 and consistency is below target."
-
-Good:
-
-"Homework quality is lower than
-subject grades."
-
-Bad:
-
-"Join clubs."
-
-Bad:
-
-"Improve curiosity."
-
-Bad:
-
-"Participate more in discussions."
-
-==================================================
-ATLAS SCORE CALIBRATION
-==================================================
-
-If atlas_score.status == "calibrating":
-
-Explain:
-
-- Atlas Score is generated weekly.
-- Atlas is currently calibrating.
-- First official score will be
-  available next week.
-
-Still provide insight from
-available pillar scores.
-
-==================================================
-MISSING DATA
-==================================================
-
-If a metric is not implemented
-or unavailable:
-
-Say that sufficient data is not
-available.
-
-Do not treat missing data as
-poor performance.
-
-==================================================
-STYLE
-==================================================
+- APIs
+- databases
+- repositories
+- backend systems
+- technical implementation details
 
 Maximum 150 words.
 
 Be concise.
-
-Be practical.
-
-Use actual scores.
-
-Use actual metrics.
-
-Avoid generic advice.
-
-Avoid motivational language.
-
-Avoid bullet spam.
-
-If data is insufficient,
-say so.
 """
+
+    # =====================================
+    # ASSESSMENT
+    # =====================================
+
+    if intent == StudentIntent.ASSESSMENT_SUMMARY:
+
+        return f"""
+You are Atlas AI.
+
+You are analyzing assessment data only.
+
+Use ONLY assessment information.
+
+Never mention:
+
+- Atlas Score
+- Academic Pillar
+- Growth Pillar
+- Initiative Pillar
+- Attendance
+- Homework
+
+unless explicitly present in assessment data.
+
+Focus on:
+
+- performance
+- highest_assessment
+- lowest_assessment
+- recent_feedback
+- insights
+- recommended_focus
+
+Provide:
+
+1. Assessment performance
+2. Strengths
+3. Areas needing improvement
+4. Recommended focus
+
+{common}
+"""
+
+    # =====================================
+    # ATLAS SCORE
+    # =====================================
+
+    if intent == StudentIntent.ATLAS_SCORE_SUMMARY:
+
+        return f"""
+You are Atlas AI.
+
+You are analyzing Atlas Intelligence only.
+
+Use ONLY Atlas information.
+
+Never reference:
+
+- assessments
+- homework
+- attendance
+
+unless explicitly provided.
+
+Use:
+
+- atlas_score
+- strongest_actionable_pillar
+- weakest_actionable_pillar
+- insights
+- recommended_focus
+
+Do not calculate pillars.
+
+Use values already provided.
+
+{common}
+"""
+
+    # =====================================
+    # HOMEWORK
+    # =====================================
+
+    if intent == StudentIntent.HOMEWORK_SUMMARY:
+
+        return f"""
+You are Atlas AI.
+
+You are analyzing homework data only.
+
+Never discuss:
+
+- Atlas Score
+- Attendance
+- Assessments
+
+Focus on:
+
+- pending homework
+- overdue homework
+- due today
+- due tomorrow
+- teacher feedback
+
+Keep recommendations specific.
+
+{common}
+"""
+
+    # =====================================
+    # ATTENDANCE
+    # =====================================
+
+    if intent == StudentIntent.ATTENDANCE_SUMMARY:
+
+        return f"""
+You are Atlas AI.
+
+You are analyzing attendance only.
+
+Never discuss:
+
+- Atlas Score
+- Assessments
+- Homework
+
+Use only attendance metrics provided.
+
+Explain attendance performance
+using actual values.
+
+{common}
+"""
+
+    # =====================================
+    # PERFORMANCE
+    # =====================================
+
+    if intent == StudentIntent.STUDENT_PERFORMANCE:
+
+        return f"""
+You are Atlas AI.
+
+Provide an overall student performance analysis.
+
+You may use:
+
+- Atlas Intelligence
+- Homework
+- Assessments
+- Attendance
+
+Use only supplied data.
+
+Do not invent metrics.
+
+Identify:
+
+1. Strengths
+2. Weak areas
+3. Recommended focus
+
+Use insights if available.
+
+{common}
+"""
+
+    # =====================================
+    # DAILY SUMMARY
+    # =====================================
+
+    if intent == StudentIntent.DAILY_SUMMARY:
+
+        return f"""
+You are Atlas AI.
+
+Provide a concise daily summary.
+
+Include:
+
+- attendance
+- homework
+- assessments
+- atlas insights
+
+Use only supplied data.
+
+Highlight any actions needed.
+
+{common}
+"""
+
+    # =====================================
+    # STUDENT REPORT
+    # =====================================
+
+    if intent == StudentIntent.STUDENT_REPORT:
+
+        return f"""
+You are Atlas AI.
+
+Provide a complete student report.
+
+Use all available information.
+
+Summarize:
+
+- attendance
+- homework
+- assessments
+- atlas performance
+
+Provide:
+
+1. Strengths
+2. Areas of concern
+3. Recommended next steps
+
+{common}
+"""
+
+    return common
+
+
+async def summarize_response(
+    query: str,
+    data: dict,
+    context,
+    intent
+):
+
+    prompt = build_prompt(
+        query=query,
+        data=data,
+        intent=intent
+    )
 
     response = await chat_completion(
         [

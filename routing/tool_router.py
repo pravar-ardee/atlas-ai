@@ -3,65 +3,125 @@ from intents.student.enums import (
 )
 
 
-INTENT_TO_TOOLS = {
-
-    StudentIntent.DAILY_SUMMARY: [
-        "attendance_tool",
-        "homework_tool",
-        "assessment_tool"
-    ],
-
-    StudentIntent.ATTENDANCE_SUMMARY: [
-        "attendance_tool"
-    ],
-
-    StudentIntent.HOMEWORK_SUMMARY: [
-        "homework_tool"
-    ],
-
-    StudentIntent.ASSESSMENT_SUMMARY: [
-        "assessment_tool"
-    ],
-
-    StudentIntent.STUDENT_PERFORMANCE: [
-        "attendance_tool",
-        "homework_tool",
-        "assessment_tool"
-    ],
-
-    StudentIntent.STUDENT_REPORT: [
-        "attendance_tool",
-        "homework_tool",
-        "assessment_tool"
-    ]
-}
-
-
 def get_tools_for_intent(
     intent
 ):
-    if intent == StudentIntent.STUDENT_PERFORMANCE:
+
+    # =====================================
+    # DAILY SUMMARY
+    # =====================================
+
+    if (
+        intent
+        ==
+        StudentIntent.DAILY_SUMMARY
+    ):
 
         return [
+
+            "attendance_tool",
+
+            "homework_tool",
+
+            "assessment_tool",
+
             "atlas_tool"
         ]
 
-    if intent == StudentIntent.DAILY_SUMMARY:
+    # =====================================
+    # ATTENDANCE
+    # =====================================
+
+    if (
+        intent
+        ==
+        StudentIntent.ATTENDANCE_SUMMARY
+    ):
 
         return [
             "attendance_tool"
         ]
 
-    if intent == StudentIntent.ATTENDANCE_SUMMARY:
+    # =====================================
+    # HOMEWORK
+    # =====================================
+
+    if (
+        intent
+        ==
+        StudentIntent.HOMEWORK_SUMMARY
+    ):
 
         return [
-            "attendance_tool"
+            "homework_tool"
         ]
 
-    if intent == StudentIntent.ATLAS_SCORE_SUMMARY:
+    # =====================================
+    # ASSESSMENTS
+    # =====================================
+
+    if (
+        intent
+        ==
+        StudentIntent.ASSESSMENT_SUMMARY
+    ):
+
+        return [
+            "assessment_tool"
+        ]
+
+    # =====================================
+    # ATLAS SCORE
+    # =====================================
+
+    if (
+        intent
+        ==
+        StudentIntent.ATLAS_SCORE_SUMMARY
+    ):
 
         return [
             "atlas_tool"
+        ]
+
+    # =====================================
+    # PERFORMANCE
+    # =====================================
+
+    if (
+        intent
+        ==
+        StudentIntent.STUDENT_PERFORMANCE
+    ):
+
+        return [
+
+            "atlas_tool",
+
+            "homework_tool",
+
+            "assessment_tool"
+        ]
+
+    # =====================================
+    # REPORT
+    # =====================================
+
+    if (
+        intent
+        ==
+        StudentIntent.STUDENT_REPORT
+    ):
+
+        return [
+
+            "atlas_tool",
+
+            "attendance_tool",
+
+            "homework_tool",
+
+            "assessment_tool"
         ]
 
     return []
