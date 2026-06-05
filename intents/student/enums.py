@@ -22,3 +22,5 @@ class StudentIntent(str, Enum):
     STUDENT_PERFORMANCE = "student_performance"
 
     STUDENT_REPORT = "student_report"
+
+    TOPIC_SUMMARY = "topic_summary"

@@ -156,5 +156,15 @@ def get_tools_for_intent(
             "subject_tool"
         ]
 
+    if (
+        intent
+        ==
+        StudentIntent.TOPIC_SUMMARY
+    ):
+
+        return [
+            "topic_tool"
+        ]
+    
     return []
 

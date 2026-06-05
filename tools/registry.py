@@ -23,6 +23,10 @@ from tools.subject_tool import (
     SubjectTool
 )
 
+from tools.topic_tool import (
+    TopicTool
+)
+
 TOOL_REGISTRY = {
 
     "atlas_tool": AtlasTool(),
@@ -38,4 +42,6 @@ TOOL_REGISTRY = {
     "forum_tool": ForumTool(),
 
     "subject_tool": SubjectTool(),
+
+    "topic_tool": TopicTool()
 }
