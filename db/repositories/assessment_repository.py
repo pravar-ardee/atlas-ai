@@ -1,4 +1,5 @@
 from sqlalchemy import text
+import statistics
 
 
 class AssessmentRepository:
@@ -470,3 +471,246 @@ class AssessmentRepository:
             dict(row)
             for row in rows
         ]
+    
+
+
+
+    # =====================================================
+    # ASSESSMENT TREND
+    # =====================================================
+
+    async def get_assessment_trend(
+        self,
+        enrollment_id: int
+    ):
+
+        query = text("""
+            SELECT
+
+                a.id,
+                a.title,
+                a.assessment_date,
+
+                r.marks_obtained,
+                a.total_marks,
+
+                ROUND(
+                        (
+                            r.marks_obtained
+                            /
+                            a.total_marks
+                        ) * 100
+                    ) AS percentage
+
+            FROM students_assessmentstudentrecord r
+
+            INNER JOIN students_assessment a
+                ON a.id = r.assessment_id
+
+            WHERE r.enrollment_id = :enrollment_id
+
+            AND r.status = 3
+
+            AND a.total_marks > 0
+
+            ORDER BY r.graded_at ASC
+        """)
+
+        result = await self.db.execute(
+            query,
+            {
+                "enrollment_id":
+                    enrollment_id
+            }
+        )
+
+        return [
+            dict(row)
+            for row in result.mappings().all()
+        ]
+
+
+
+
+    async def get_consistency_metrics(
+        self,
+        enrollment_id: int
+    ):
+
+        trend_data = await self.get_assessment_trend(
+            enrollment_id
+        )
+
+        if not trend_data:
+
+            return {
+
+                "count": 0,
+
+                "average": 0,
+
+                "highest": 0,
+
+                "lowest": 0,
+
+                "range": 0,
+
+                "std_dev": 0,
+
+                "rating": "Insufficient Data"
+            }
+
+        scores = [
+
+            row["percentage"]
+
+            for row in trend_data
+        ]
+
+        highest = max(scores)
+
+        lowest = min(scores)
+
+        average = round(
+            sum(scores)
+            /
+            len(scores),
+            2
+        )
+
+        std_dev = 0
+
+        if len(scores) > 1:
+
+            std_dev = round(
+                statistics.stdev(scores),
+                2
+            )
+
+        if std_dev < 5:
+
+            rating = "Excellent"
+
+        elif std_dev < 10:
+
+            rating = "Good"
+
+        elif std_dev < 20:
+
+            rating = "Moderate"
+
+        else:
+
+            rating = "Poor"
+
+        return {
+
+            "count":
+                len(scores),
+
+            "average":
+                average,
+
+            "highest":
+                highest,
+
+            "lowest":
+                lowest,
+
+            "range":
+                round(
+                    highest - lowest,
+                    2
+                ),
+
+            "std_dev":
+                std_dev,
+
+            "rating":
+                rating
+        }
+    
+    async def get_risk_assessments(
+        self,
+        enrollment_id: int
+    ):
+
+        query = text("""
+            SELECT
+
+                a.id,
+                a.title,
+                a.assessment_date,
+                a.total_marks,
+                a.type,
+
+                r.marks_obtained,
+                r.grade,
+                r.teacher_comment
+
+            FROM students_assessmentstudentrecord r
+
+            INNER JOIN students_assessment a
+                ON a.id = r.assessment_id
+
+            WHERE r.enrollment_id = :enrollment_id
+
+            AND r.status = 3
+
+            AND a.total_marks > 0
+
+            ORDER BY a.assessment_date DESC
+        """)
+
+        result = await self.db.execute(
+            query,
+            {
+                "enrollment_id":
+                    enrollment_id
+            }
+        )
+
+        rows = result.mappings().all()
+
+        risks = []
+
+        for row in rows:
+
+            row = dict(row)
+
+            percentage = round(
+                (
+                    row["marks_obtained"]
+                    /
+                    row["total_marks"]
+                ) * 100,
+                2
+            )
+
+            if percentage < 50:
+
+                if percentage < 30:
+
+                    risk_level = "critical"
+
+                elif percentage < 50:
+
+                    risk_level = "high"
+
+                else:
+
+                    risk_level = "medium"
+
+                row["percentage"] = percentage
+
+                row["risk_level"] = risk_level
+
+                risks.append(
+                    row
+                )
+
+        risks.sort(
+            key=lambda x: x["percentage"]
+        )
+
+        return risks

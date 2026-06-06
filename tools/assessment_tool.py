@@ -29,6 +29,8 @@ class AssessmentTool:
                 ""
             )
             .lower()
+            .replace("?", "")
+            .replace(".", "")
             .strip()
         )
 
@@ -80,6 +82,99 @@ class AssessmentTool:
                 )
             )
 
+            trend_history = (
+                await repo.get_assessment_trend(
+                    context.enrollment_id
+                )
+            )
+
+            consistency = (
+                await repo.get_consistency_metrics(
+                    context.enrollment_id
+                )
+            )
+
+            risk_assessments = (
+                await repo.get_risk_assessments(
+                    context.enrollment_id
+                )
+            )
+
+            trend = {
+
+                "valid": False,
+
+                "direction": None,
+
+                "previous_average": 0,
+
+                "recent_average": 0
+            }
+
+            if len(trend_history) >= 5:
+
+                midpoint = (
+                    len(trend_history)
+                    //
+                    2
+                )
+
+                first_half = [
+                    row["percentage"]
+                    for row in trend_history[:midpoint]
+                ]
+
+                second_half = [
+                    row["percentage"]
+                    for row in trend_history[midpoint:]
+                ]
+
+                previous_average = round(
+                    sum(first_half)
+                    /
+                    len(first_half),
+                    2
+                )
+
+                recent_average = round(
+                    sum(second_half)
+                    /
+                    len(second_half),
+                    2
+                )
+
+                direction = "stable"
+
+                if (
+                    recent_average
+                    >
+                    previous_average + 5
+                ):
+
+                    direction = "improving"
+
+                elif (
+                    recent_average
+                    <
+                    previous_average - 5
+                ):
+
+                    direction = "declining"
+
+                trend = {
+
+                    "valid": True,
+
+                    "direction":
+                        direction,
+
+                    "previous_average":
+                        previous_average,
+
+                    "recent_average":
+                        recent_average
+                }
+
             insights = []
 
             recommended_focus = []
@@ -111,6 +206,41 @@ class AssessmentTool:
                 insights.append(
                     "One assessment score is below 40%."
                 )
+            if trend["direction"] == "declining":
+
+                insights.append(
+                    "Recent assessment performance is declining."
+                )
+
+            elif trend["direction"] == "improving":
+
+                insights.append(
+                    "Recent assessment performance is improving."
+                )
+
+            assessment_flags = {
+
+                "below_target_average":
+                    performance.get(
+                        "average_percentage",
+                        0
+                    ) < 60,
+
+                "has_low_score":
+                    performance.get(
+                        "lowest_percentage",
+                        0
+                    ) < 40,
+
+                "has_pending":
+                    len(pending) > 0,
+
+                "has_risk_assessments":
+                    len(risk_assessments) > 0,
+
+                "trend":
+                    trend["direction"]
+            }
 
             if lowest_assessment:
 
@@ -119,6 +249,36 @@ class AssessmentTool:
                         "title"
                     ]
                 )
+            
+            if risk_assessments:
+
+                insights.append(
+                    f"{len(risk_assessments)} "
+                    f"assessment(s) are below 50%."
+                )
+
+            improvement_opportunities = []
+
+            if len(pending) > 0:
+
+                improvement_opportunities.append(
+                    "Complete pending assessments."
+                )
+
+            if risk_assessments:
+
+                improvement_opportunities.append(
+                    "Improve low-scoring assessments."
+                )
+
+            if (
+                    consistency.get("rating")
+                    in ["Moderate", "Poor"]
+            ):
+
+                improvement_opportunities.append(
+                    "Improve score consistency."
+                )
 
             performance_summary = {
 
@@ -126,6 +286,11 @@ class AssessmentTool:
                     performance.get(
                         "average_percentage",
                         0
+                    ),
+
+                "consistency_rating":
+                    consistency.get(
+                        "rating"
                     ),
 
                 "best_assessment":
@@ -153,7 +318,9 @@ class AssessmentTool:
                     recommended_focus,
 
                 "insights":
-                    insights
+                    insights,
+                
+                "improvement_opportunities": improvement_opportunities
             }
 
             payload = {
@@ -188,6 +355,21 @@ class AssessmentTool:
                 "performance":
                     performance,
 
+                "assessment_trend": trend,
+
+                "risk_assessments": risk_assessments,
+
+                "improvement_opportunities": improvement_opportunities,
+                
+                "trend":
+                    trend,
+
+                "consistency":
+                    consistency,
+
+                "trend_history":
+                    trend_history,
+
                 "insights":
                     insights,
 
@@ -195,7 +377,9 @@ class AssessmentTool:
                     recommended_focus,
 
                 "performance_summary":
-                    performance_summary
+                    performance_summary,
+
+                "assessment_flags": assessment_flags,
             }
 
             # =====================================
@@ -280,6 +464,84 @@ class AssessmentTool:
                         "You currently have no "
                         "pending assessments."
                     )
+
+                return payload
+
+            # =====================================
+            # TREND
+            # =====================================
+
+            if any(
+                phrase in query
+                for phrase in [
+                    "scores improving",
+                    "getting better",
+                    "assessment trend",
+                    "score trend",
+                    "performance trend",
+                    "improving in assessments",
+                    "am i improving",
+                    "are my scores improving",
+                    "how have my scores changed",
+                    "improvement trend",
+                    "am i getting better",
+                    "are my grades improving",
+                    "are my marks improving",
+                    "how are my scores changing"
+                ]
+            ):
+
+                if not trend["valid"]:
+
+                    payload[
+                        "direct_answer"
+                    ] = (
+                        "There is not enough "
+                        "assessment history "
+                        "to determine a trend."
+                    )
+
+                else:
+
+                    payload[
+                        "direct_answer"
+                    ] = (
+                        f"Your recent assessment "
+                        f"average is "
+                        f"{trend['recent_average']}%, "
+                        f"compared with "
+                        f"{trend['previous_average']}%. "
+                        f"Your assessment performance "
+                        f"is currently "
+                        f"{trend['direction']}."
+                    )
+
+                return payload
+
+            # =====================================
+            # CONSISTENCY
+            # =====================================
+
+            if any(
+                phrase in query
+                for phrase in [
+                    "consistent",
+                    "consistency",
+                    "stable performance"
+                ]
+            ):
+
+                payload[
+                    "direct_answer"
+                ] = (
+                    f"You have completed "
+                    f"{consistency['count']} graded "
+                    f"assessment(s). "
+                    f"Consistency rating: "
+                    f"{consistency['rating']}. "
+                    f"Average score: "
+                    f"{consistency['average']}%."
+                )
 
                 return payload
 
@@ -387,7 +649,7 @@ class AssessmentTool:
                         f"You scored "
                         f"{latest_result['marks_obtained']}/"
                         f"{latest_result['total_marks']} "
-                        f" ({latest_result['percentage']}%)."
+                        f"({latest_result['percentage']}%)."
                     )
 
                 else:
@@ -438,6 +700,74 @@ class AssessmentTool:
                     )
 
                 return payload
+            
+            # =====================================
+            # RISK ASSESSMENTS
+            # =====================================
+
+            if any(
+                phrase in query
+                for phrase in [
+                    "risk assessments",
+                    "at risk",
+                    "weak assessments",
+                    "low scoring assessments",
+                    "high risk assessments"
+                ]
+            ):
+
+                if risk_assessments:
+
+                    names = [
+
+                        item["title"]
+
+                        for item in risk_assessments[:3]
+                    ]
+
+                    payload[
+                        "direct_answer"
+                    ] = (
+                        "Assessments needing "
+                        "attention: "
+                        +
+                        ", ".join(names)
+                        +
+                        "."
+                    )
+
+                else:
+
+                    payload[
+                        "direct_answer"
+                    ] = (
+                        "No high-risk assessments "
+                        "were identified."
+                    )
+
+                return payload
+
+            # =====================================
+            # TREND ANALYSIS
+            # =====================================
+
+            if any(
+                phrase in query
+                for phrase in [
+                    "why are my grades dropping",
+                    "analyze my assessment trend",
+                    "analyse my assessment trend",
+                    "what concerns do you see",
+                    "what does my assessment trend indicate",
+                    "why is my performance declining"
+                ]
+            ):
+
+                payload[
+                    "assessment_trend_analysis"
+                ] = True
+
+                return payload
 
             # =====================================
             # ASSESSMENT ANALYSIS
@@ -456,8 +786,7 @@ class AssessmentTool:
                     "average score",
                     "assessment summary",
                     "assessment review",
-                    "improve my assessments",
-                    "why are my scores dropping"
+                    "improve my assessments"
                 ]
             ):
 
