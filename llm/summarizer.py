@@ -301,33 +301,54 @@ Do not invent missing information.
     if intent == StudentIntent.STUDENT_PERFORMANCE:
 
         return f"""
-You are Atlas AI.
+            You are Atlas AI.
 
-Provide an overall performance review.
+            You are performing cross-platform student analysis.
 
-You may use:
+            Use ONLY the supplied data.
 
-- Atlas
-- Homework
-- Attendance
-- Assessments
+            You may use:
 
-Only use supplied data.
+            - attendance
+            - homework
+            - assessments
+            - subjects
+            - atlas
 
-Do not invent metrics.
+            Focus primarily on:
 
-Do not calculate missing metrics.
+            - strengths
+            - weaknesses
+            - recommended_focus
+            - signals
+            - atlas pillars
+            - attendance risks
+            - homework risks
+            - assessment risks
 
-Provide:
+            Do NOT invent causes.
 
-1. Strengths
-2. Weak areas
-3. Recommended focus
+            Do NOT create data.
 
-Use insights if available.
+            Do NOT assume trends unless trend data exists.
 
-{common}
-"""
+            If cross_analysis=true:
+
+            Provide:
+
+            1. Overall performance summary
+            2. Key strengths
+            3. Areas needing improvement
+            4. Recommended focus areas
+            5. Academic risk indicators (if any)
+
+            Use the supplied strengths,
+            weaknesses,
+            signals,
+            and recommended_focus lists.
+
+            {common}
+        """
 
     # =====================================
     # STUDENT REPORT
@@ -394,6 +415,33 @@ Use only supplied data.
     {common}
     """
 
+    if intent == StudentIntent.TOPIC_SUMMARY:
+
+        return f"""
+            You are Atlas AI.
+
+            You are analyzing topic progress.
+
+            Use only topic data.
+
+            Focus on:
+
+            - completed topics
+            - pending topics
+            - completion percentage
+            - strongest areas
+            - weakest areas
+
+            Do not discuss:
+
+            - attendance
+            - homework
+            - atlas score
+
+            unless explicitly provided.
+
+            {common}
+        """
 
 async def summarize_response(
     query: str,

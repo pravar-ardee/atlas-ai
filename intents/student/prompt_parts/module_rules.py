@@ -19,13 +19,19 @@ atlas_score_summary
 ["atlas"]
 
 student_performance
-["atlas","attendance","homework","assessment"]
+[
+    "attendance",
+    "homework",
+    "assessment",
+    "subject",
+    "atlas"
+]
 
-subject_analysis
-["atlas","assessment","homework"]
+subject_summary
+["subject"]
 
-topic_analysis
-["assessment","homework","lesson_plan"]
+topic_summary
+["topic"]
 
 announcement_summary
 ["announcement"]
@@ -43,5 +49,11 @@ lor_summary
 ["lor"]
 
 student_report
-["atlas","attendance","homework","assessment"]
+[
+    "atlas",
+    "attendance",
+    "homework",
+    "assessment",
+    "subject"
+]
 """

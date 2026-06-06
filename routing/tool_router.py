@@ -97,12 +97,7 @@ def get_tools_for_intent(
     ):
 
         return [
-
-            "atlas_tool",
-
-            "homework_tool",
-
-            "assessment_tool"
+            "student_performance_tool"
         ]
 
     # =====================================

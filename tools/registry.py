@@ -27,6 +27,10 @@ from tools.topic_tool import (
     TopicTool
 )
 
+from tools.student_performance_tool import (
+    StudentPerformanceTool
+)
+
 TOOL_REGISTRY = {
 
     "atlas_tool": AtlasTool(),
@@ -43,5 +47,9 @@ TOOL_REGISTRY = {
 
     "subject_tool": SubjectTool(),
 
-    "topic_tool": TopicTool()
+    "topic_tool": TopicTool(),
+
+    "student_performance_tool":
+        StudentPerformanceTool(),
+    
 }
