@@ -20,6 +20,10 @@ from services.date_service import (
     DateService
 )
 
+from cache.pending_action_cache import (
+    PendingActionCache
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -73,6 +77,78 @@ class AIService:
             )
 
             results[tool_name] = result
+
+            print(result)
+
+        # =====================================
+        # ACTION REQUIRED SHORT CIRCUIT
+        # =====================================
+
+        for tool_result in results.values():
+
+            if (
+                isinstance(tool_result, dict)
+                and
+                tool_result.get(
+                    "action_required"
+                )
+            ):
+
+                await PendingActionCache.save(
+
+                    user_id=context.user_id,
+
+                    action_type=
+                        tool_result.get(
+                            "action_type"
+                        ),
+
+                    payload=
+                        tool_result.get(
+                            "payload",
+                            {}
+                        )
+                )
+
+                logger.info(
+                    "Pending action stored: %s",
+                    tool_result.get(
+                        "action_type"
+                    )
+                )
+
+                return {
+
+                    "success": True,
+
+                    "query":
+                        query,
+
+                    "intent":
+                        parsed_intent.model_dump(),
+
+                    "data":
+                        results,
+
+                    "summary":
+                        tool_result.get(
+                            "confirmation_message"
+                        ),
+
+                    "action_required":
+                        True,
+
+                    "confirmation_required":
+                        tool_result.get(
+                            "confirmation_required",
+                            False
+                        ),
+
+                    "action_type":
+                        tool_result.get(
+                            "action_type"
+                        )
+                }
 
         # =====================================
         # DIRECT ANSWER SHORT CIRCUIT

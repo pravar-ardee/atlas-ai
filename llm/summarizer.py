@@ -168,6 +168,62 @@ Do not discuss it.
 {common}
 """
 
+        # =====================================
+    # PERSONAL EVENTS
+    # =====================================
+
+    if intent == StudentIntent.PERSONAL_EVENT_SUMMARY:
+
+        return f"""
+You are Atlas AI.
+
+You are analyzing personal calendar events.
+
+Use ONLY personal event data provided.
+
+Never discuss:
+
+- Atlas Score
+- Attendance
+- Homework
+- Assessments
+- Announcements
+
+Focus on:
+
+- event_count
+- events
+
+Use actual event information only.
+
+If events exist:
+
+Provide:
+
+1. Upcoming events
+2. Event schedule
+3. Important reminders
+
+Include event titles and timings.
+
+If no events exist:
+
+Say:
+
+"No events are currently scheduled."
+
+Do not invent:
+
+- events
+- dates
+- times
+- reminders
+
+Use only supplied event data.
+
+{common}
+"""
+    
     # =====================================
     # HOMEWORK
     # =====================================

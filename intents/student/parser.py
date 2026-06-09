@@ -53,6 +53,11 @@ async def parse_student_intent(
             content
         )
 
+        logger.info(
+            "Parsed intent json: %s",
+            parsed
+        )
+
         parsed["original_query"] = query
 
         return ParsedStudentIntent(
@@ -60,6 +65,11 @@ async def parse_student_intent(
         )
 
     except Exception:
+
+        logger.exception(
+            "Intent parsing failed"
+        )
+
 
         fallback = (
             build_fallback_student_intent()

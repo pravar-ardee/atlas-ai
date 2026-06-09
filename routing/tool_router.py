@@ -161,5 +161,45 @@ def get_tools_for_intent(
             "topic_tool"
         ]
     
+    if (
+        intent
+        ==
+        StudentIntent.PERSONAL_EVENT_SUMMARY
+    ):
+
+        return [
+            "personal_event_tool"
+        ]
+    
+    if (
+        intent
+        ==
+        StudentIntent.PERSONAL_EVENT_CREATE
+    ):
+
+        return [
+            "personal_event_create_tool"
+        ]
+    
+    if (
+        intent
+        ==
+        StudentIntent.ACTION_CONFIRMATION
+    ):
+
+        return [
+            "action_executor_tool"
+        ]
+    
+    if (
+        intent
+        ==
+        StudentIntent.ACTION_CONFIRMATION
+    ):
+
+        return [
+            "action_executor_tool"
+        ]
+    
     return []
 
