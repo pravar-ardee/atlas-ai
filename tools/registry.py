@@ -37,6 +37,14 @@ from tools.personal_event_tool import PersonalEventTool
 
 from tools.action_executor_tool import ActionExecutorTool
 
+from tools.journal_tool import (
+    JournalTool
+)
+
+from tools.journal_create_tool import (
+    JournalCreateTool
+)
+
 TOOL_REGISTRY = {
 
     "atlas_tool": AtlasTool(),
@@ -63,5 +71,9 @@ TOOL_REGISTRY = {
     "personal_event_create_tool": PersonalEventCreateTool(),
 
     "action_executor_tool": ActionExecutorTool(),
+
+    "journal_tool": JournalTool(),
+
+    "journal_create_tool": JournalCreateTool()
     
 }

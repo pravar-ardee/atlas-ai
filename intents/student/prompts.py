@@ -15,6 +15,8 @@ from intents.student.prompt_parts.forum import FORUM_PROMPT
 from intents.student.prompt_parts.subject import SUBJECT_PROMPT
 from intents.student.prompt_parts.personal_event import PERSONAL_EVENT_PROMPT
 from intents.student.prompt_parts.action_confirmation import ACTION_CONFIRMATION_PROMPT
+from intents.student.prompt_parts.journal_prompt import JOURNAL_PROMPT
+
 
 def get_student_intent_prompt():
 
@@ -50,6 +52,8 @@ SUPPORTED INTENTS
 {PERFORMANCE_PROMPT}
 
 {PERSONAL_EVENT_PROMPT}
+
+{JOURNAL_PROMPT}
 
 {MISC_PROMPTS}
 

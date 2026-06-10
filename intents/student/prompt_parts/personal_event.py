@@ -11,14 +11,23 @@ Used when the student asks about:
 - reminders
 - upcoming events
 - personal events
+- upcoming events
+- appointments
+- study sessions
+- activities
 
 Examples:
 
-- What events do I have today?
-- Show my calendar.
-- What is scheduled tomorrow?
-- Any reminders this week?
-- Show my upcoming events.
+- events tomorrow
+- upcoming events
+- what events do i have
+- show my calendar
+- show my schedule
+- what is scheduled today
+- what reminders do i have
+- show upcoming events
+- do i have anything planned
+- what study sessions are scheduled
 
 ==================================================
 

@@ -68,21 +68,15 @@ class PersonalEventTool:
 
                     "tomorrow",
 
-                    "today"
+                    "today",
+
+                    "upcoming",
+
+                    "reminders"
                 ]
             ):
 
-                if events:
-
-                    payload[
-                        "direct_answer"
-                    ] = (
-                        f"You have "
-                        f"{len(events)} "
-                        f"event(s)."
-                    )
-
-                else:
+                if not events:
 
                     payload[
                         "direct_answer"

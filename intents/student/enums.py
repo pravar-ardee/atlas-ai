@@ -29,5 +29,11 @@ class StudentIntent(str, Enum):
 
     PERSONAL_EVENT_CREATE = "personal_event_create"
 
+    JOURNAL_SUMMARY = "journal_summary"
+    
+    JOURNAL_CREATE = "journal_create"
+
     ACTION_CONFIRMATION = "action_confirmation"
+
+  
 

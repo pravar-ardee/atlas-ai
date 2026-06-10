@@ -164,6 +164,26 @@ def get_tools_for_intent(
     if (
         intent
         ==
+        StudentIntent.JOURNAL_SUMMARY
+    ):
+
+        return [
+            "journal_tool"
+        ]
+
+    if (
+        intent
+        ==
+        StudentIntent.JOURNAL_CREATE
+    ):
+
+        return [
+            "journal_create_tool"
+        ]
+    
+    if (
+        intent
+        ==
         StudentIntent.PERSONAL_EVENT_SUMMARY
     ):
 

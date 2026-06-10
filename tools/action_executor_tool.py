@@ -12,6 +12,10 @@ from db.repositories.personal_event_repository import (
     PersonalEventRepository
 )
 
+from db.repositories.journal_repository import (
+    JournalRepository
+)
+
 from services.event_mapper import (
     EVENT_TYPE_MAP
 )
@@ -152,8 +156,74 @@ class ActionExecutorTool:
             }
 
         # =====================================
+        # CREATE JOURNAL
+        # =====================================
+
+        if (
+            action_type
+            ==
+            "create_journal"
+        ):
+
+            async with AsyncSessionLocal() as db:
+
+                repo = (
+                    JournalRepository(
+                        db
+                    )
+                )
+
+                journal_id = (
+                    await repo.create_entry(
+
+                        student_id=
+                            context.student_id,
+
+                        content=
+                            payload.get(
+                                "content"
+                            )
+                    )
+                )
+
+            await PendingActionCache.delete(
+                context.user_id
+            )
+
+            logger.info(
+                "Journal created: %s",
+                journal_id
+            )
+
+            return {
+
+                "module":
+                    "action",
+
+                "action_completed":
+                    True,
+
+                "action_type":
+                    "create_journal",
+
+                "journal_id":
+                    journal_id,
+
+                "direct_answer":
+                    (
+                        "Your journal entry "
+                        "has been saved."
+                    )
+            }
+
+        # =====================================
         # UNKNOWN ACTION
         # =====================================
+
+        logger.warning(
+            "Unsupported action type: %s",
+            action_type
+        )
 
         return {
 

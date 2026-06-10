@@ -43,7 +43,7 @@ async def parse_student_intent(
     content = response["message"]["content"]
 
     logger.info(
-        "Intent parser response: %s",
+        "RAW INTENT RESPONSE: %s",
         content
     )
 
@@ -58,7 +58,54 @@ async def parse_student_intent(
             parsed
         )
 
-        parsed["original_query"] = query
+        # =====================================
+        # INTENT NORMALIZATION
+        # =====================================
+
+        intent = parsed.get(
+            "intent"
+        )
+
+        if (
+            intent
+            ==
+            "event_summary"
+        ):
+
+            parsed["intent"] = (
+                "personal_event_summary"
+            )
+
+        elif (
+            intent
+            ==
+            "event_create"
+        ):
+
+            parsed["intent"] = (
+                "personal_event_create"
+            )
+
+        elif (
+            intent
+            ==
+            "event_confirmation"
+        ):
+
+            parsed["intent"] = (
+                "action_confirmation"
+            )
+
+        logger.info(
+            "Normalized intent: %s",
+            parsed.get(
+                "intent"
+            )
+        )
+
+        parsed[
+            "original_query"
+        ] = query
 
         return ParsedStudentIntent(
             **parsed
@@ -70,12 +117,13 @@ async def parse_student_intent(
             "Intent parsing failed"
         )
 
-
         fallback = (
             build_fallback_student_intent()
         )
 
-        fallback["original_query"] = query
+        fallback[
+            "original_query"
+        ] = query
 
         return ParsedStudentIntent(
             **fallback

@@ -4,6 +4,14 @@ from intents.router import (
     parse_intent
 )
 
+from intents.student.enums import (
+    StudentIntent
+)
+
+from intents.student.schemas import (
+    ParsedStudentIntent
+)
+
 from routing.tool_router import (
     get_tools_for_intent
 )
@@ -35,16 +43,63 @@ class AIService:
         context
     ):
 
-        parsed_intent = await parse_intent(
-            query=query,
-            role=context.role
-        )
+        # =====================================
+        # CONFIRMATION SHORT CIRCUIT
+        # =====================================
 
-        parsed_intent = (
-            DateService.validate(
-                parsed_intent
+        pending_action = (
+            await PendingActionCache.get(
+                context.user_id
             )
         )
+
+        if (
+            pending_action
+            and
+            query.strip().lower()
+            in [
+                "yes",
+                "y",
+                "confirm",
+                "ok",
+                "okay"
+            ]
+        ):
+
+            logger.info(
+                "Pending action confirmation detected"
+            )
+
+            parsed_intent = (
+                ParsedStudentIntent(
+
+                    intent=
+                        StudentIntent.ACTION_CONFIRMATION,
+
+                    start_date=None,
+
+                    end_date=None,
+
+                    target_modules=[],
+
+                    confidence=1.0,
+
+                    original_query=query
+                )
+            )
+
+        else:
+
+            parsed_intent = await parse_intent(
+                query=query,
+                role=context.role
+            )
+
+            parsed_intent = (
+                DateService.validate(
+                    parsed_intent
+                )
+            )
 
         logger.info(
             "Parsed Intent: %s",
@@ -69,6 +124,12 @@ class AIService:
             )
 
             if tool is None:
+
+                logger.warning(
+                    "Tool not found: %s",
+                    tool_name
+                )
+
                 continue
 
             result = await tool.run(
@@ -78,7 +139,11 @@ class AIService:
 
             results[tool_name] = result
 
-            print(result)
+            logger.info(
+                "Tool result [%s]: %s",
+                tool_name,
+                result
+            )
 
         # =====================================
         # ACTION REQUIRED SHORT CIRCUIT
@@ -93,29 +158,6 @@ class AIService:
                     "action_required"
                 )
             ):
-
-                await PendingActionCache.save(
-
-                    user_id=context.user_id,
-
-                    action_type=
-                        tool_result.get(
-                            "action_type"
-                        ),
-
-                    payload=
-                        tool_result.get(
-                            "payload",
-                            {}
-                        )
-                )
-
-                logger.info(
-                    "Pending action stored: %s",
-                    tool_result.get(
-                        "action_type"
-                    )
-                )
 
                 return {
 
